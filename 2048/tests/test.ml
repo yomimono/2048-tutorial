@@ -444,6 +444,31 @@ let test_game_over is_game_over =
         [t16  ; t8    ; t16  ];
         [t8   ; t1024 ; t1024]])
 
+let test_invalid_moves shift_board =
+  let test_single direction =
+    assert_equal false
+      ~msg:"Shifting on a full, non-coalescing row is not a valid move"
+      (snd (shift_board direction [[t2; t4; t2]]))
+  in
+  List.iter test_single [ L; R; U; D ];
+
+  assert_equal false
+    ~msg:"Shifting up on a non-full board with no coalescing moves is not a valid move"
+    (snd (shift_board U
+       [[t8   ; t2    ; t8   ];
+        [t16  ; t8    ; t16  ];
+        [t8   ; empty ; t1024]]));
+
+  let test_near_gameover direction =
+    assert_equal false
+      ~msg:"Shifting on nearly-locked board is not a valid move"
+      (snd (shift_board direction
+       [[t8   ; t2    ; t16  ];
+        [t16  ; t8    ; t16  ];
+        [t8   ; t1024 ; t2   ]]))
+  in
+  List.iter test_near_gameover [ L; R ]
+
 module Make (S: Solution) = struct
 
   module X = Make(S)
@@ -495,6 +520,12 @@ module Make (S: Solution) = struct
       (fun () -> test_row_provenance X.shift_board X.square_provenances);
       "provenance: test provenance" >::
       (fun () -> test_provenance X.shift_board X.square_provenances);
+
+      (* 6. tests for randomness *)
+
+      (* 7. tests for valid moves *)
+      "shift_board_honestly: test validity" >::
+      (fun () -> test_invalid_moves X.shift_board_honestly);
 
       (* Always-on tests *)
       "test is_board_full" >::

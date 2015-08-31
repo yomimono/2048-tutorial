@@ -9,7 +9,9 @@
 
 (** {1 Types} *)
 
-type square = int option
+type tile
+
+type square = tile option
 (** The type for squares. *)
 
 type row = square list
@@ -115,7 +117,13 @@ module type Solution = sig
 
   val shift_board : move -> board -> board
   (** [shift_board move board] is the board resulting from shifting
-      [board] in direction [move]. *)
+      [board] in direction [move], with no consideration of whether this move is
+      valid*)
+
+  val shift_board_honestly : move -> board -> (board * bool)
+  (** [shift_board move board] is the board resulting from shifting
+      [board] in direction [move], but only if this board differs from [board];
+      if not, [shift_board move board] is None *)
 
   val is_game_over : board -> bool
   (** [is_game_over board] is [true] iff there are no valid moves. *)
